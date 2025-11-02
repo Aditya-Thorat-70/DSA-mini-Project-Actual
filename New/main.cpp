@@ -17,8 +17,8 @@ void Mark_Booked_Cars(int carId) {
             break;
         }
     }
-    if (found) write_all_cars(cars);
-    else cout << "❌ Car not found or already booked.\n";
+    // if (found) write_all_cars(cars);
+    // else cout << "❌ Car not found or already booked.\n";
 }
 
 // ✅ Sorting Menu
@@ -52,7 +52,7 @@ void sort_menu() {
     cout << "\n--- Sorted Cars ---\n";
     for (auto &c : cars)
         cout << "ID: " << c.id << " | " << c.brand << " " << c.model
-             << " | Year: " << c.year << " | ₹" << c.price
+             << " | Year: " << c.year << " | Price: " << c.price
              << " | Status: " << c.status << "\n";
 }
 
@@ -81,7 +81,7 @@ void buyer_menu() {
                     if (c.status == "Available")
                         cout << "ID: " << c.id << " | " << c.brand << " " << c.model
                              << " | Year: " << c.year
-                             << " | ₹" << c.dynamic_price() << "\n";
+                             << " | Price" << c.price << "\n";
                 break;
             }
 
@@ -147,7 +147,7 @@ void buyer_menu() {
                 append_booking(b);
                 log_action("Booking created ID " + to_string(b.bookingId));
                 Mark_Booked_Cars(id);
-                cout << "✅ Booking successful!\n";
+                cout << " Booking successful!\n";
                 break;
             }
 

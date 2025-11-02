@@ -27,11 +27,10 @@ struct Car {
     string brand;
     string model;
     int year;
-    double price; // base price
+    double price;
     string seller;
-    string status; // "Available", "Booked", "Sold"
+    string status;
 
-    // Convert from line
     static bool from_line(const string &line, Car &c) {
         vector<string> parts;
         string cur;
@@ -53,7 +52,6 @@ struct Car {
         return true;
     }
 
-    // Convert to line
     string to_line() const {
         ostringstream os;
         os << id << '|' << brand << '|' << model << '|' << year << '|'
@@ -61,7 +59,6 @@ struct Car {
         return os.str();
     }
 
-    // Dynamic price based on age
     double dynamic_price() const {
         time_t t = time(nullptr);
         tm *lt = localtime(&t);
@@ -70,7 +67,7 @@ struct Car {
         double adjusted = price;
         if (age > 3) {
             int extra = age - 3;
-            for (int i = 0; i < extra; ++i) adjusted *= 0.95; // 5% reduction per year
+            for (int i = 0; i < extra; ++i) adjusted *= 0.95;
         }
         return adjusted;
     }
@@ -81,8 +78,8 @@ struct Booking {
     int bookingId;
     int carId;
     string buyer;
-    string date;   // simple string
-    string status; // Pending, OutForDelivery, Delivered
+    string date;
+    string status;
 
     static bool from_line(const string &line, Booking &b) {
         vector<string> p;
@@ -153,6 +150,10 @@ public:
     }
 };
 
+// Forward declarations so compiler knows these exist
+inline void append_delivery(const Booking& b);
+inline void log_action(const string &s);
+
 // ---- Stack for Deliveries ----
 struct DeliveryNode {
     Booking data;
@@ -215,7 +216,7 @@ public:
         }
         Booking b = q.front(); q.pop();
         b.status = "Delivered";
-        append_delivery(b);
+        append_delivery(b);  // ✅ now compiler knows this exists
         log_action("Delivered booking ID " + to_string(b.bookingId));
         cout << "Delivered booking: " << b.bookingId << endl;
     }
