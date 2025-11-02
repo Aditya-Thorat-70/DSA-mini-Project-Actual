@@ -11,7 +11,7 @@ static const string DELIVERIES_FILE = "deliveries.txt";
 static const string SELLERS_FILE = "sellers.txt";
 static const string TRANSACTIONS_LOG = "transactions.log";
 
-// ===================== FILE SETUP ======================
+// Utility: ensure file exists
 inline void ensure_file(const string &fname) {
     ifstream in(fname);
     if (!in.is_open()) {
@@ -67,8 +67,7 @@ struct Car {
         double adjusted = price;
         if (age > 3) {
             int extra = age - 3;
-            for (int i = 0; i < extra; ++i)
-                adjusted *= 0.95;
+            for (int i = 0; i < extra; ++i) adjusted *= 0.95;
         }
         return adjusted;
     }
@@ -110,7 +109,6 @@ struct Booking {
 
 // ===================== DSA STRUCTURES ======================
 
-// ---- Linked List for Cars ----
 struct CarNode {
     Car data;
     CarNode *next;
@@ -130,7 +128,6 @@ public:
             temp->next = newNode;
         }
     }
-
     vector<Car> to_vector() const {
         vector<Car> res;
         CarNode *temp = head;
@@ -140,7 +137,6 @@ public:
         }
         return res;
     }
-
     ~CarLinkedList() {
         CarNode *curr = head;
         while (curr) {
@@ -166,13 +162,11 @@ class DeliveryStack {
     DeliveryNode *topNode;
 public:
     DeliveryStack() : topNode(nullptr) {}
-
     void push(const Booking &b) {
         DeliveryNode *node = new DeliveryNode(b);
         node->next = topNode;
         topNode = node;
     }
-
     bool pop(Booking &b) {
         if (!topNode) return false;
         b = topNode->data;
@@ -181,9 +175,7 @@ public:
         delete temp;
         return true;
     }
-
     bool isEmpty() const { return topNode == nullptr; }
-
     vector<Booking> to_vector() const {
         vector<Booking> res;
         DeliveryNode *temp = topNode;
@@ -194,7 +186,6 @@ public:
         reverse(res.begin(), res.end());
         return res;
     }
-
     ~DeliveryStack() {
         Booking temp;
         while (!isEmpty()) pop(temp);
@@ -221,17 +212,15 @@ public:
         log_action("Delivered booking ID " + to_string(b.bookingId));
         cout << "Delivered booking: " << b.bookingId << endl;
     }
-
     bool empty() const { return q.empty(); }
 };
 
-// ---- Sorting Utilities ----
+// Sorting Utilities
 inline void sort_by_brand(vector<Car>& cars) {
     sort(cars.begin(), cars.end(), [](const Car &a, const Car &b) {
         return a.brand < b.brand;
     });
 }
-
 inline void sort_by_price(vector<Car>& cars) {
     sort(cars.begin(), cars.end(), [](const Car &a, const Car &b) {
         return a.price < b.price;
@@ -239,7 +228,6 @@ inline void sort_by_price(vector<Car>& cars) {
 }
 
 // ===================== FILE HANDLING ======================
-
 inline vector<Car> read_all_cars() {
     ensure_file(CARS_FILE);
     ifstream in(CARS_FILE);
@@ -252,17 +240,14 @@ inline vector<Car> read_all_cars() {
     }
     return res;
 }
-
 inline void write_all_cars(const vector<Car>& cars) {
     ofstream out(CARS_FILE, ios::trunc);
     for (const auto &c : cars) out << c.to_line() << '\n';
 }
-
 inline void append_car(const Car& c) {
     ofstream out(CARS_FILE, ios::app);
     out << c.to_line() << '\n';
 }
-
 inline vector<Booking> read_all_bookings() {
     ensure_file(BOOKINGS_FILE);
     ifstream in(BOOKINGS_FILE);
@@ -275,17 +260,14 @@ inline vector<Booking> read_all_bookings() {
     }
     return res;
 }
-
 inline void write_all_bookings(const vector<Booking>& v) {
     ofstream out(BOOKINGS_FILE, ios::trunc);
     for (auto &b : v) out << b.to_line() << '\n';
 }
-
 inline void append_booking(const Booking& b) {
     ofstream out(BOOKINGS_FILE, ios::app);
     out << b.to_line() << '\n';
 }
-
 inline vector<Booking> read_all_deliveries() {
     ensure_file(DELIVERIES_FILE);
     ifstream in(DELIVERIES_FILE);
@@ -298,35 +280,29 @@ inline vector<Booking> read_all_deliveries() {
     }
     return res;
 }
-
 inline void write_all_deliveries(const vector<Booking>& v) {
     ofstream out(DELIVERIES_FILE, ios::trunc);
     for (auto &b : v) out << b.to_line() << '\n';
 }
-
 inline void append_delivery(const Booking& b) {
     ofstream out(DELIVERIES_FILE, ios::app);
     out << b.to_line() << '\n';
 }
-
-// ===================== LOGGING ======================
 inline void log_action(const string &s) {
     ofstream out(TRANSACTIONS_LOG, ios::app);
     time_t t = time(nullptr);
-    tm *lt = localtime(&t);
-    char buf[64];
-    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", lt);
-    out << "[" << buf << "] " << s << '\n';
+    out << "[" << ctime(&t);
+    out.seekp(-1, ios::cur);
+    out << "] " << s << '\n';
 }
 
-// ===================== ID GENERATORS ======================
+// ID Generators
 inline int next_car_id() {
     auto cars = read_all_cars();
     int mx = 100;
     for (auto &c : cars) mx = max(mx, c.id);
     return mx + 1;
 }
-
 inline int next_booking_id() {
     auto bookings = read_all_bookings();
     int mx = 1000;
@@ -336,31 +312,26 @@ inline int next_booking_id() {
     return mx + 1;
 }
 
-// ===================== EXTRA FEATURE ======================
-inline bool mark_booked_car(int carId) {
+// ===================== ADMIN FEATURE: UPDATE CAR STATUS ======================
+inline bool admin_update_car_status(int carId, const string &newStatus) {
     vector<Car> cars = read_all_cars();
     bool found = false;
+
     for (auto &c : cars) {
         if (c.id == carId) {
-            if (c.status == "Available") {
-                c.status = "Booked";
-                found = true;
-                log_action("Car ID " + to_string(carId) + " marked as Booked");
-            } else {
-                cout << "Car ID " << carId << " is already " << c.status << ".\n";
-                return false;
-            }
-            break;
+            found = true;
+            string oldStatus = c.status;
+            c.status = newStatus;
+            write_all_cars(cars);
+            log_action("ADMIN updated Car ID " + to_string(carId) + 
+                       " Status: " + oldStatus + " -> " + newStatus);
+            cout << "✅ Car ID " << carId << " updated from [" << oldStatus 
+                 << "] to [" << newStatus << "]\n";
+            return true;
         }
     }
-    if (found) {
-        write_all_cars(cars);
-        cout << "✅ Car ID " << carId << " has been marked as 'Booked'.\n";
-        return true;
-    } else {
-        cout << "❌ Car with ID " << carId << " not found.\n";
-        return false;
-    }
+    cout << "❌ Car ID " << carId << " not found.\n";
+    return false;
 }
 
-#endif // DATA_H
+#endif
