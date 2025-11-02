@@ -11,7 +11,7 @@ static const string DELIVERIES_FILE = "deliveries.txt";
 static const string SELLERS_FILE = "sellers.txt";
 static const string TRANSACTIONS_LOG = "transactions.log";
 
-// Utility: ensure file exists
+// ===================== FILE SETUP ======================
 inline void ensure_file(const string &fname) {
     ifstream in(fname);
     if (!in.is_open()) {
@@ -67,7 +67,8 @@ struct Car {
         double adjusted = price;
         if (age > 3) {
             int extra = age - 3;
-            for (int i = 0; i < extra; ++i) adjusted *= 0.95;
+            for (int i = 0; i < extra; ++i)
+                adjusted *= 0.95;
         }
         return adjusted;
     }
@@ -150,7 +151,7 @@ public:
     }
 };
 
-// Forward declarations so compiler knows these exist
+// Forward declarations
 inline void append_delivery(const Booking& b);
 inline void log_action(const string &s);
 
@@ -216,7 +217,7 @@ public:
         }
         Booking b = q.front(); q.pop();
         b.status = "Delivered";
-        append_delivery(b);  // ✅ now compiler knows this exists
+        append_delivery(b);
         log_action("Delivered booking ID " + to_string(b.bookingId));
         cout << "Delivered booking: " << b.bookingId << endl;
     }
@@ -239,7 +240,6 @@ inline void sort_by_price(vector<Car>& cars) {
 
 // ===================== FILE HANDLING ======================
 
-// read all cars
 inline vector<Car> read_all_cars() {
     ensure_file(CARS_FILE);
     ifstream in(CARS_FILE);
@@ -253,19 +253,16 @@ inline vector<Car> read_all_cars() {
     return res;
 }
 
-// write all cars
 inline void write_all_cars(const vector<Car>& cars) {
     ofstream out(CARS_FILE, ios::trunc);
     for (const auto &c : cars) out << c.to_line() << '\n';
 }
 
-// append car
 inline void append_car(const Car& c) {
     ofstream out(CARS_FILE, ios::app);
     out << c.to_line() << '\n';
 }
 
-// read all bookings
 inline vector<Booking> read_all_bookings() {
     ensure_file(BOOKINGS_FILE);
     ifstream in(BOOKINGS_FILE);
@@ -279,19 +276,16 @@ inline vector<Booking> read_all_bookings() {
     return res;
 }
 
-// write all bookings
 inline void write_all_bookings(const vector<Booking>& v) {
     ofstream out(BOOKINGS_FILE, ios::trunc);
     for (auto &b : v) out << b.to_line() << '\n';
 }
 
-// append booking
 inline void append_booking(const Booking& b) {
     ofstream out(BOOKINGS_FILE, ios::app);
     out << b.to_line() << '\n';
 }
 
-// read all deliveries
 inline vector<Booking> read_all_deliveries() {
     ensure_file(DELIVERIES_FILE);
     ifstream in(DELIVERIES_FILE);
@@ -305,28 +299,27 @@ inline vector<Booking> read_all_deliveries() {
     return res;
 }
 
-// write all deliveries
 inline void write_all_deliveries(const vector<Booking>& v) {
     ofstream out(DELIVERIES_FILE, ios::trunc);
     for (auto &b : v) out << b.to_line() << '\n';
 }
 
-// append delivery
 inline void append_delivery(const Booking& b) {
     ofstream out(DELIVERIES_FILE, ios::app);
     out << b.to_line() << '\n';
 }
 
-// logging
+// ===================== LOGGING ======================
 inline void log_action(const string &s) {
     ofstream out(TRANSACTIONS_LOG, ios::app);
     time_t t = time(nullptr);
-    out << "[" << ctime(&t);
-    out.seekp(-1, ios::cur);
-    out << "] " << s << '\n';
+    tm *lt = localtime(&t);
+    char buf[64];
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", lt);
+    out << "[" << buf << "] " << s << '\n';
 }
 
-// next ID generators
+// ===================== ID GENERATORS ======================
 inline int next_car_id() {
     auto cars = read_all_cars();
     int mx = 100;
@@ -344,8 +337,6 @@ inline int next_booking_id() {
 }
 
 // ===================== EXTRA FEATURE ======================
-
-// Mark car as booked
 inline bool mark_booked_car(int carId) {
     vector<Car> cars = read_all_cars();
     bool found = false;
