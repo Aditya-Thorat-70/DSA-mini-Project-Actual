@@ -25,8 +25,102 @@ void Mark_Booked_Cars(int carId) {
     }
 
     if (found) write_all_cars(cars);
-    else cout << "❌ Car with ID " << carId << " not found.\n";
+    //else cout << " Car with ID " << carId << " not found.\n";
 }
+
+//Filter + recommend cars
+void Filter_and_recommended(){
+    string brand;
+            int minYear = 0, maxYear = 0;
+            double minPrice = 0, maxPrice = 0;
+
+            cout << "Filter by Brand (leave blank for any): ";
+            getline(cin, brand);
+            cout << "Filter by Min Year (0 for any): ";
+            cin >> minYear;
+            cout << "Filter by Max Year (0 for any): ";
+            cin >> maxYear;
+            cout << "Filter by Min Price (0 for any): ";
+            cin >> minPrice;
+            cout << "Filter by Max Price (0 for any): ";
+            cin >> maxPrice;
+            cin.ignore();
+
+            auto cars = read_all_cars();
+            vector<Car> results;
+            for (auto &c : cars) {
+                if (c.status != "Available") continue;
+                if (!brand.empty() && c.brand != brand) continue;
+                if (minYear != 0 && c.year < minYear) continue;
+                if (maxYear != 0 && c.year > maxYear) continue;
+                double dp = c.price; // use original listed price for filtering
+if (minPrice != 0 && dp < minPrice) continue;
+if (maxPrice != 0 && dp > maxPrice) continue;
+
+                results.push_back(c);
+            }
+
+            cout << "\n--- Filtered Cars ---\n";
+            if (results.empty()) cout << "No cars match your filters.\n";
+            else {
+                for (auto &c : results)
+                    cout << "ID: " << c.id << " | " << c.brand << " " << c.model
+                         << " | Year: " << c.year
+                         << " | Price: " << c.price
+                         << " | Seller: " << c.seller << "\n";
+
+                  //cout<<"/ ---------------- RECOMMENDED CARS ----------------" <<endl; 
+    unordered_map<string, vector<string>> similarBrands = {
+        {"Hyundai", {"Kia"}},
+        {"Kia", {"Hyundai"}},
+        {"Suzuki", {"Toyota"}},
+        {"Toyota", {"Suzuki"}},
+        {"Tata", {"Mahindra"}},
+        {"Mahindra", {"Tata"}},
+        {"Honda", {"Nissan"}},
+        {"Nissan", {"Honda"}}
+    };
+
+    double avgPrice = (minPrice + maxPrice) / 2.0;
+    double lowerLimit = avgPrice * 0.95;
+    double upperLimit = avgPrice * 1.05;
+
+    vector<string> related = similarBrands[brand];
+    vector<Car> recommended;
+
+    for (auto &c : cars) {
+        //if (!c.available) continue;
+
+        bool priceMatch = (c.price >= lowerLimit && c.price <= upperLimit);
+        bool brandMatch = (find(related.begin(), related.end(), c.brand) != related.end());
+
+        // Exclude cars already shown in main filter
+        bool alreadyListed = false;
+        for (auto &f : results) {
+            if (f.id == c.id) {
+                alreadyListed = true;
+                break;
+            }
+        }
+
+        // Recommendation condition: similar brand OR close price range
+        if (priceMatch && (!alreadyListed || brandMatch)) {
+            recommended.push_back(c);
+        }
+    }
+
+    if (!recommended.empty()) {
+        cout << "\n--------- Recommended For You ---------\n";
+        for (auto &c : recommended) {
+            cout << "Brand: " << c.brand << " | Model: " << c.model
+                 << " | Year: " << c.year << " | Price: " << c.price << endl;
+        }
+    } else {
+        cout << "\n(No additional recommendations found.)\n";
+    }
+            }
+        }
+
 
 // ---------- Pretty Print Car Table ----------
 void print_car_table(const vector<Car>& cars) {
@@ -35,7 +129,7 @@ void print_car_table(const vector<Car>& cars) {
          << setw(15) << "Model"
          << setw(8) << "Year"
          << setw(12) << "Price"
-         << setw(15) << "Seller"
+         << setw(25) << "Seller"
          << setw(12) << "Status" << "\n";
     cout << string(80, '-') << "\n";
 
@@ -44,8 +138,8 @@ void print_car_table(const vector<Car>& cars) {
              << setw(12) << c.brand
              << setw(15) << c.model
              << setw(8) << c.year
-             << setw(12) << fixed << setprecision(2) << c.dynamic_price()
-             << setw(15) << c.seller
+             << setw(12) << fixed << setprecision(2) << c.price
+             << setw(25) << c.seller
              << setw(12) << c.status << "\n";
     }
 }
@@ -122,7 +216,7 @@ void buyer_menu() {
                 auto cars = read_all_cars();
                 vector<Car> results;
                 for (auto &c : cars) {
-                    double dp = c.dynamic_price();
+                    double dp = c.price;
                     if (c.status == "Available" && dp >= minP && dp <= maxP)
                         results.push_back(c);
                 }
@@ -152,7 +246,7 @@ void buyer_menu() {
                 break;
             }
             case 6: {
-                cout << "Feature retained (filter & recommend cars).\n";
+               Filter_and_recommended();
                 break;
             }
             default:

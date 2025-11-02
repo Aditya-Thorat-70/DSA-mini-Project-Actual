@@ -83,3 +83,9 @@ void admin_panel() {
         }
     }
 }
+int main(){
+    cout << "Admin console\nPassword: ";
+    string pwd; getline(cin, pwd);
+    if (pwd != "admin123") { cout << "Wrong password.\n"; return 0; }
+    admin_panel();
+}

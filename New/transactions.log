@@ -42,3 +42,15 @@
 ] Booking created ID 1004
 [Sun Nov 02 09:54:03 2025
 ] Booking created ID 1005
+[Sun Nov 02 19:03:37 2025
+] Booking created 1006
+[Sun Nov 02 20:35:36 2025
+] Delivered booking ID 1001
+[Sun Nov 02 20:35:40 2025
+] Delivered booking ID 1002
+[Sun Nov 02 20:35:41 2025
+] Delivered booking ID 1003
+[Sun Nov 02 20:36:04 2025
+] Delivered booking ID 1004
+[Sun Nov 02 20:40:31 2025
+] Admin updated car ID 125 status: Available -> Booked

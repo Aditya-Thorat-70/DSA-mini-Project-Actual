@@ -297,10 +297,10 @@ inline bool admin_update_car_status(int id, const string &status) {
             c.status = status;
             write_all_cars(cars);
             log_action("Admin updated car ID " + to_string(id) + " status: " + old + " -> " + status);
-            cout << "✅ Car " << id << " updated from " << old << " to " << status << endl;
+            cout << " Car " << id << " updated from " << old << " to " << status << endl;
             return true;
         }
-    cout << "❌ Car ID not found.\n";
+    cout << " Car ID not found.\n";
     return false;
 }
 
