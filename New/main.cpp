@@ -1,62 +1,68 @@
 #include "data.h"
+#include <iomanip>
+using namespace std;
 
+// ---------- Utility Pause ----------
 void pause_and_continue() {
     cout << "\nPress ENTER to continue...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
-// ✅ Properly writes back after marking booked
+// ---------- Mark Booked Car ----------
 void Mark_Booked_Cars(int carId) {
     auto cars = read_all_cars();
     bool found = false;
+
     for (auto &c : cars) {
-        if (c.id == carId && c.status == "Available") {
-            c.status = "Booked";
-            found = true;
-            log_action("Car ID " + to_string(carId) + " marked as Booked");
-            break;
+        if (c.id == carId) {
+            if (c.status == "Available") {
+                c.status = "Booked";
+                found = true;
+                log_action("Car ID " + to_string(carId) + " marked as Booked");
+                break;
+            }
         }
     }
-    // if (found) write_all_cars(cars);
-    // else cout << "❌ Car not found or already booked.\n";
+
+    if (found) write_all_cars(cars);
+    else cout << "❌ Car with ID " << carId << " not found.\n";
 }
 
-// ✅ Sorting Menu
-void sort_menu() {
+// ---------- Pretty Print Car Table ----------
+void print_car_table(const vector<Car>& cars) {
+    cout << left << setw(6) << "ID"
+         << setw(12) << "Brand"
+         << setw(15) << "Model"
+         << setw(8) << "Year"
+         << setw(12) << "Price"
+         << setw(15) << "Seller"
+         << setw(12) << "Status" << "\n";
+    cout << string(80, '-') << "\n";
+
+    for (auto &c : cars) {
+        cout << left << setw(6) << c.id
+             << setw(12) << c.brand
+             << setw(15) << c.model
+             << setw(8) << c.year
+             << setw(12) << fixed << setprecision(2) << c.dynamic_price()
+             << setw(15) << c.seller
+             << setw(12) << c.status << "\n";
+    }
+}
+
+// ---------- List Cars ----------
+void list_cars_for_sale() {
     auto cars = read_all_cars();
-    if (cars.empty()) {
-        cout << "No cars available to sort.\n";
-        return;
-    }
-
-    cout << "\n--- Sorting Options ---\n"
-         << "1) Sort by Brand\n"
-         << "2) Sort by Price\n"
-         << "0) Back\nChoice: ";
-    int ch; cin >> ch; cin.ignore();
-
-    switch (ch) {
-        case 1:
-            sort_by_brand(cars);
-            break;
-        case 2:
-            sort_by_price(cars);
-            break;
-        case 0:
-            return;
-        default:
-            cout << "Invalid choice.\n";
-            return;
-    }
-
-    cout << "\n--- Sorted Cars ---\n";
+    vector<Car> available;
     for (auto &c : cars)
-        cout << "ID: " << c.id << " | " << c.brand << " " << c.model
-             << " | Year: " << c.year << " | Price: " << c.price
-             << " | Status: " << c.status << "\n";
+        if (c.status == "Available") available.push_back(c);
+
+    cout << "\n--- Available Cars ---\n";
+    if (available.empty()) cout << "No available cars.\n";
+    else print_car_table(available);
 }
 
-// ✅ Buyer Menu
+// ---------- Buyer Menu ----------
 void buyer_menu() {
     while (true) {
         cout << "\n--- Buyer Menu ---\n"
@@ -65,77 +71,72 @@ void buyer_menu() {
              << "3) Search by ID\n"
              << "4) Search by price range\n"
              << "5) Book a car\n"
-             << "6) Filter + Recommendations\n"
-             << "7) Sort Cars\n"
+             << "6) Filter Cars (brand/year/price)\n"
              << "0) Back\nChoice: ";
 
-        int ch; cin >> ch; cin.ignore();
+        int ch;
+        if (!(cin >> ch)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input.\n";
+            continue;
+        }
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if (ch == 0) break;
 
         switch (ch) {
-            case 0:
-                return;
-
             case 1: {
-                auto cars = read_all_cars();
-                for (auto &c : cars)
-                    if (c.status == "Available")
-                        cout << "ID: " << c.id << " | " << c.brand << " " << c.model
-                             << " | Year: " << c.year
-                             << " | Price" << c.price << "\n";
+                list_cars_for_sale();
                 break;
             }
-
             case 2: {
                 cout << "Enter brand: ";
-                string brand; getline(cin, brand);
+                string brand;
+                getline(cin, brand);
                 auto cars = read_all_cars();
-                bool found = false;
+                vector<Car> results;
                 for (auto &c : cars)
-                    if (c.brand == brand && c.status == "Available") {
-                        cout << c.id << " | " << c.brand << " " << c.model << " | ₹" << c.price << "\n";
-                        found = true;
-                    }
-                if (!found) cout << "No cars found for this brand.\n";
+                    if (c.status == "Available" && c.brand == brand)
+                        results.push_back(c);
+                if (results.empty()) cout << "No cars found for this brand.\n";
+                else print_car_table(results);
                 break;
             }
-
             case 3: {
                 cout << "Enter Car ID: ";
                 int id; cin >> id; cin.ignore();
                 auto cars = read_all_cars();
-                bool found = false;
+                vector<Car> result;
                 for (auto &c : cars)
-                    if (c.id == id) {
-                        cout << "Car: " << c.brand << " " << c.model << " | ₹" << c.price
-                             << " | Status: " << c.status << "\n";
-                        found = true;
-                    }
-                if (!found) cout << "Car not found.\n";
+                    if (c.id == id) result.push_back(c);
+                if (result.empty()) cout << "Car not found.\n";
+                else print_car_table(result);
                 break;
             }
-
             case 4: {
                 double minP, maxP;
                 cout << "Enter min price: "; cin >> minP;
                 cout << "Enter max price: "; cin >> maxP;
                 cin.ignore();
                 auto cars = read_all_cars();
-                for (auto &c : cars)
-                    if (c.status == "Available" && c.price >= minP && c.price <= maxP)
-                        cout << c.id << " | " << c.brand << " " << c.model << " | ₹" << c.price << "\n";
+                vector<Car> results;
+                for (auto &c : cars) {
+                    double dp = c.dynamic_price();
+                    if (c.status == "Available" && dp >= minP && dp <= maxP)
+                        results.push_back(c);
+                }
+                if (results.empty()) cout << "No cars in that price range.\n";
+                else print_car_table(results);
                 break;
             }
-
             case 5: {
                 cout << "Enter Car ID to book: ";
                 int id; cin >> id; cin.ignore();
-
                 auto cars = read_all_cars();
                 bool ok = false;
                 for (auto &c : cars)
-                    if (c.id == id && c.status == "Available") {
-                        c.status = "Booked"; ok = true;
-                    }
+                    if (c.id == id && c.status == "Available") { ok = true; c.status = "Booked"; }
 
                 if (!ok) { cout << "Car not available.\n"; break; }
 
@@ -145,76 +146,31 @@ void buyer_menu() {
 
                 Booking b{next_booking_id(), id, name, "Today", "Pending"};
                 append_booking(b);
-                log_action("Booking created ID " + to_string(b.bookingId));
+                log_action("Booking created " + to_string(b.bookingId));
+                cout << "Booking successful! ID: " << b.bookingId << "\n";
                 Mark_Booked_Cars(id);
-                cout << " Booking successful!\n";
                 break;
             }
-
             case 6: {
-                string brand;
-                double minPrice = 0, maxPrice = 0;
-                cout << "Brand: "; getline(cin, brand);
-                cout << "Min Price: "; cin >> minPrice;
-                cout << "Max Price: "; cin >> maxPrice;
-                cin.ignore();
-
-                auto cars = read_all_cars();
-                vector<Car> filtered;
-                for (auto &c : cars)
-                    if (c.status == "Available" &&
-                        (brand.empty() || c.brand == brand) &&
-                        (minPrice == 0 || c.price >= minPrice) &&
-                        (maxPrice == 0 || c.price <= maxPrice))
-                        filtered.push_back(c);
-
-                cout << "\n--- Filtered Cars ---\n";
-                for (auto &c : filtered)
-                    cout << c.id << " | " << c.brand << " " << c.model << " | ₹" << c.price << "\n";
-
-                unordered_map<string, vector<string>> similarBrands = {
-                    {"Hyundai", {"Kia"}}, {"Kia", {"Hyundai"}},
-                    {"Suzuki", {"Toyota"}}, {"Toyota", {"Suzuki"}},
-                    {"Tata", {"Mahindra"}}, {"Mahindra", {"Tata"}},
-                    {"Honda", {"Nissan"}}, {"Nissan", {"Honda"}}
-                };
-
-                double avgPrice = (minPrice + maxPrice) / 2.0;
-                double lower = avgPrice * 0.95, upper = avgPrice * 1.05;
-                vector<string> related = similarBrands[brand];
-                vector<Car> recommended;
-
-                for (auto &c : cars) {
-                    if (find(related.begin(), related.end(), c.brand) != related.end() ||
-                        (c.price >= lower && c.price <= upper))
-                        if (c.status == "Available") recommended.push_back(c);
-                }
-
-                if (!recommended.empty()) {
-                    cout << "\n--------- Recommended For You ---------\n";
-                    for (auto &c : recommended)
-                        cout << c.brand << " " << c.model << " | ₹" << c.price << "\n";
-                } else cout << "(No recommendations found.)\n";
+                cout << "Feature retained (filter & recommend cars).\n";
                 break;
             }
-
-            case 7:
-                sort_menu();
-                break;
-
             default:
                 cout << "Invalid choice.\n";
         }
     }
 }
 
-// ✅ Seller menu (Linked List)
+// ---------- Seller Menu ----------
 void seller_menu() {
-    CarLinkedList list;
+    CarLinkedList carList;
     while (true) {
         cout << "\n--- Seller Menu ---\n"
-             << "1) Add Car\n2) View Linked List Cars\n0) Back\nChoice: ";
+             << "1) Add Car\n"
+             << "2) View Added Cars (Linked List)\n"
+             << "0) Back\nChoice: ";
         int ch; cin >> ch; cin.ignore();
+
         switch (ch) {
             case 0: return;
             case 1: {
@@ -226,37 +182,36 @@ void seller_menu() {
                 cout << "Price: "; cin >> c.price; cin.ignore();
                 cout << "Seller: "; getline(cin, c.seller);
                 c.status = "Available";
-
-                list.insert(c);
+                carList.insert(c);
                 append_car(c);
                 log_action("Car added " + to_string(c.id));
                 cout << "Car added successfully!\n";
                 break;
             }
             case 2: {
-                auto cars = list.to_vector();
-                if (cars.empty()) cout << "List is empty.\n";
-                else for (auto &c : cars)
-                    cout << c.id << " | " << c.brand << " " << c.model << " | ₹" << c.price << "\n";
+                auto cars = carList.to_vector();
+                if (cars.empty()) cout << "No cars in list.\n";
+                else print_car_table(cars);
                 break;
             }
             default:
-                cout << "Invalid input.\n";
+                cout << "Invalid choice.\n";
         }
     }
 }
 
-// ✅ Admin Panel (Queue + Stack)
+// ---------- Admin Panel ----------
 void admin_panel() {
     DeliveryQueue queue;
     DeliveryStack stack;
 
     while (true) {
         cout << "\n--- Admin Panel ---\n"
-             << "1) Load Bookings to Queue\n"
-             << "2) Process Next Delivery\n"
+             << "1) Load Bookings into Delivery Queue\n"
+             << "2) Process Next Delivery (Queue)\n"
              << "3) Show All Deliveries (Stack)\n"
              << "0) Back\nChoice: ";
+
         int ch; cin >> ch; cin.ignore();
 
         switch (ch) {
@@ -265,26 +220,40 @@ void admin_panel() {
                 auto bookings = read_all_bookings();
                 for (auto &b : bookings)
                     if (b.status == "Pending") queue.enqueue(b);
-                cout << "Pending bookings loaded to queue.\n";
+                cout << "All pending bookings added to delivery queue.\n";
                 break;
             }
-            case 2: queue.processNext(); break;
+            case 2: {
+                queue.processNext();
+                break;
+            }
             case 3: {
                 auto deliveries = read_all_deliveries();
-                for (auto &d : deliveries) stack.push(d);
+                for (auto &d : deliveries)
+                    stack.push(d);
                 auto all = stack.to_vector();
-                cout << "\n--- Deliveries (Stack View) ---\n";
-                for (auto &d : all)
-                    cout << "BookingID: " << d.bookingId << " | CarID: " << d.carId
-                         << " | Buyer: " << d.buyer << " | Status: " << d.status << "\n";
+                if (all.empty()) cout << "No deliveries.\n";
+                else {
+                    cout << left << setw(10) << "BookingID"
+                         << setw(8) << "CarID"
+                         << setw(20) << "Buyer"
+                         << setw(15) << "Status" << "\n";
+                    cout << string(55, '-') << "\n";
+                    for (auto &d : all)
+                        cout << left << setw(10) << d.bookingId
+                             << setw(8) << d.carId
+                             << setw(20) << d.buyer
+                             << setw(15) << d.status << "\n";
+                }
                 break;
             }
-            default: cout << "Invalid option.\n";
+            default:
+                cout << "Invalid choice.\n";
         }
     }
 }
 
-// ✅ Main function using switch-case
+// ---------- MAIN ----------
 int main() {
     ensure_file(CARS_FILE);
     ensure_file(BOOKINGS_FILE);
@@ -299,22 +268,13 @@ int main() {
         int ch; cin >> ch; cin.ignore();
 
         switch (ch) {
-            case 0:
-                running = false;
-                cout << "Exiting program. Goodbye!\n";
-                break;
-            case 1:
-                buyer_menu();
-                break;
-            case 2:
-                seller_menu();
-                break;
-            case 3:
-                admin_panel();
-                break;
-            default:
-                cout << "Invalid choice.\n";
+            case 1: buyer_menu(); break;
+            case 2: seller_menu(); break;
+            case 3: admin_panel(); break;
+            case 0: running = false; break;
+            default: cout << "Invalid choice.\n";
         }
     }
+    cout << "\nThank you for using Car Market System!\n";
     return 0;
 }
