@@ -11,7 +11,7 @@ static const string DELIVERIES_FILE = "deliveries.txt";
 static const string SELLERS_FILE = "sellers.txt";
 static const string TRANSACTIONS_LOG = "transactions.log";
 
-// Utility: ensure file exists
+// ===================== FILE CHECK ======================
 inline void ensure_file(const string &fname) {
     ifstream in(fname);
     if (!in.is_open()) {
@@ -107,7 +107,7 @@ struct Booking {
     }
 };
 
-// ===================== DSA STRUCTURES ======================
+// ===================== DSA CLASSES ======================
 
 struct CarNode {
     Car data;
@@ -148,7 +148,7 @@ public:
 };
 
 // Forward declarations
-inline void append_delivery(const Booking& b);
+inline void append_delivery(const Booking &b);
 inline void log_action(const string &s);
 
 // ---- Stack for Deliveries ----
@@ -200,7 +200,6 @@ public:
         q.push(b);
         cout << "Booking added to delivery queue: " << b.bookingId << endl;
     }
-
     void processNext() {
         if (q.empty()) {
             cout << "No pending deliveries.\n";
@@ -212,37 +211,22 @@ public:
         log_action("Delivered booking ID " + to_string(b.bookingId));
         cout << "Delivered booking: " << b.bookingId << endl;
     }
-    bool empty() const { return q.empty(); }
 };
-
-// Sorting Utilities
-inline void sort_by_brand(vector<Car>& cars) {
-    sort(cars.begin(), cars.end(), [](const Car &a, const Car &b) {
-        return a.brand < b.brand;
-    });
-}
-inline void sort_by_price(vector<Car>& cars) {
-    sort(cars.begin(), cars.end(), [](const Car &a, const Car &b) {
-        return a.price < b.price;
-    });
-}
 
 // ===================== FILE HANDLING ======================
 inline vector<Car> read_all_cars() {
     ensure_file(CARS_FILE);
     ifstream in(CARS_FILE);
-    vector<Car> res;
-    string line;
+    vector<Car> res; string line;
     while (getline(in, line)) {
         if (line.empty()) continue;
-        Car c;
-        if (Car::from_line(line, c)) res.push_back(c);
+        Car c; if (Car::from_line(line, c)) res.push_back(c);
     }
     return res;
 }
 inline void write_all_cars(const vector<Car>& cars) {
     ofstream out(CARS_FILE, ios::trunc);
-    for (const auto &c : cars) out << c.to_line() << '\n';
+    for (auto &c : cars) out << c.to_line() << '\n';
 }
 inline void append_car(const Car& c) {
     ofstream out(CARS_FILE, ios::app);
@@ -251,12 +235,10 @@ inline void append_car(const Car& c) {
 inline vector<Booking> read_all_bookings() {
     ensure_file(BOOKINGS_FILE);
     ifstream in(BOOKINGS_FILE);
-    vector<Booking> res;
-    string line;
+    vector<Booking> res; string line;
     while (getline(in, line)) {
         if (line.empty()) continue;
-        Booking b;
-        if (Booking::from_line(line, b)) res.push_back(b);
+        Booking b; if (Booking::from_line(line, b)) res.push_back(b);
     }
     return res;
 }
@@ -271,12 +253,10 @@ inline void append_booking(const Booking& b) {
 inline vector<Booking> read_all_deliveries() {
     ensure_file(DELIVERIES_FILE);
     ifstream in(DELIVERIES_FILE);
-    vector<Booking> res;
-    string line;
+    vector<Booking> res; string line;
     while (getline(in, line)) {
         if (line.empty()) continue;
-        Booking b;
-        if (Booking::from_line(line, b)) res.push_back(b);
+        Booking b; if (Booking::from_line(line, b)) res.push_back(b);
     }
     return res;
 }
@@ -296,7 +276,7 @@ inline void log_action(const string &s) {
     out << "] " << s << '\n';
 }
 
-// ID Generators
+// ===================== UTILITIES ======================
 inline int next_car_id() {
     auto cars = read_all_cars();
     int mx = 100;
@@ -307,30 +287,20 @@ inline int next_booking_id() {
     auto bookings = read_all_bookings();
     int mx = 1000;
     for (auto &b : bookings) mx = max(mx, b.bookingId);
-    auto del = read_all_deliveries();
-    for (auto &b : del) mx = max(mx, b.bookingId);
     return mx + 1;
 }
-
-// ===================== ADMIN FEATURE: UPDATE CAR STATUS ======================
-inline bool admin_update_car_status(int carId, const string &newStatus) {
-    vector<Car> cars = read_all_cars();
-    bool found = false;
-
-    for (auto &c : cars) {
-        if (c.id == carId) {
-            found = true;
-            string oldStatus = c.status;
-            c.status = newStatus;
+inline bool admin_update_car_status(int id, const string &status) {
+    auto cars = read_all_cars();
+    for (auto &c : cars)
+        if (c.id == id) {
+            string old = c.status;
+            c.status = status;
             write_all_cars(cars);
-            log_action("ADMIN updated Car ID " + to_string(carId) + 
-                       " Status: " + oldStatus + " -> " + newStatus);
-            cout << "✅ Car ID " << carId << " updated from [" << oldStatus 
-                 << "] to [" << newStatus << "]\n";
+            log_action("Admin updated car ID " + to_string(id) + " status: " + old + " -> " + status);
+            cout << "✅ Car " << id << " updated from " << old << " to " << status << endl;
             return true;
         }
-    }
-    cout << "❌ Car ID " << carId << " not found.\n";
+    cout << "❌ Car ID not found.\n";
     return false;
 }
 
