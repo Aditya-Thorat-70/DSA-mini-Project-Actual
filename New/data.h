@@ -20,12 +20,16 @@ inline void ensure_file(const string &fname) {
 }
 
 // ===================== STRUCT DEFINITIONS ======================
+
+// ---- Car Record ----
 struct Car {
     int id;
-    string brand, model;
+    string brand;
+    string model;
     int year;
     double price;
-    string seller, status;
+    string seller;
+    string status;
 
     static bool from_line(const string &line, Car &c) {
         vector<string> parts;
@@ -69,9 +73,13 @@ struct Car {
     }
 };
 
+// ---- Booking Record ----
 struct Booking {
-    int bookingId, carId;
-    string buyer, date, status;
+    int bookingId;
+    int carId;
+    string buyer;
+    string date;
+    string status;
 
     static bool from_line(const string &line, Booking &b) {
         vector<string> p;
@@ -111,36 +119,38 @@ class CarLinkedList {
 public:
     CarLinkedList() : head(nullptr) {}
     void insert(const Car &c) {
-        CarNode *n = new CarNode(c);
-        if (!head) head = n;
+        CarNode *newNode = new CarNode(c);
+        if (!head) head = newNode;
         else {
             CarNode *temp = head;
             while (temp->next) temp = temp->next;
-            temp->next = n;
+            temp->next = newNode;
         }
     }
     vector<Car> to_vector() const {
         vector<Car> res;
-        CarNode *t = head;
-        while (t) {
-            res.push_back(t->data);
-            t = t->next;
+        CarNode *temp = head;
+        while (temp) {
+            res.push_back(temp->data);
+            temp = temp->next;
         }
         return res;
     }
     ~CarLinkedList() {
-        CarNode *c = head;
-        while (c) {
-            CarNode *n = c->next;
-            delete c;
-            c = n;
+        CarNode *curr = head;
+        while (curr) {
+            CarNode *next = curr->next;
+            delete curr;
+            curr = next;
         }
     }
 };
 
-// Forward declarations
+// ===================== FORWARD DECLARATIONS ======================
 inline void append_delivery(const Booking &b);
 inline void log_action(const string &s);
+inline vector<Booking> read_all_bookings();
+inline void write_all_bookings(const vector<Booking>&);
 inline bool admin_update_car_status(int id, const string &status);
 
 // ===================== STACK ======================
@@ -155,26 +165,33 @@ class DeliveryStack {
 public:
     DeliveryStack() : topNode(nullptr) {}
     void push(const Booking &b) {
-        DeliveryNode *n = new DeliveryNode(b);
-        n->next = topNode;
-        topNode = n;
+        DeliveryNode *node = new DeliveryNode(b);
+        node->next = topNode;
+        topNode = node;
     }
     bool pop(Booking &b) {
         if (!topNode) return false;
         b = topNode->data;
-        DeliveryNode *t = topNode;
+        DeliveryNode *temp = topNode;
         topNode = topNode->next;
-        delete t;
+        delete temp;
         return true;
     }
+    bool isEmpty() const { return topNode == nullptr; }
     vector<Booking> to_vector() const {
         vector<Booking> res;
-        DeliveryNode *t = topNode;
-        while (t) { res.push_back(t->data); t = t->next; }
+        DeliveryNode *temp = topNode;
+        while (temp) {
+            res.push_back(temp->data);
+            temp = temp->next;
+        }
         reverse(res.begin(), res.end());
         return res;
     }
-    bool isEmpty() const { return topNode == nullptr; }
+    ~DeliveryStack() {
+        Booking temp;
+        while (!isEmpty()) pop(temp);
+    }
 };
 
 // ===================== QUEUE ======================
@@ -191,11 +208,13 @@ public:
             cout << "No pending deliveries.\n";
             return;
         }
-        Booking b = q.front(); q.pop();
+
+        Booking b = q.front();
+        q.pop();
         b.status = "Delivered";
         append_delivery(b);
 
-        // ✅ Update booking file
+        // ✅ Update bookings.txt
         vector<Booking> allBookings = read_all_bookings();
         for (auto &bk : allBookings)
             if (bk.bookingId == b.bookingId) {
@@ -204,7 +223,7 @@ public:
             }
         write_all_bookings(allBookings);
 
-        // ✅ Update car status to "Sold"
+        // ✅ Update car status to Sold
         admin_update_car_status(b.carId, "Sold");
 
         log_action("Delivered booking ID " + to_string(b.bookingId));
@@ -218,69 +237,57 @@ public:
 inline vector<Car> read_all_cars() {
     ensure_file(CARS_FILE);
     ifstream in(CARS_FILE);
-    vector<Car> v; string line;
+    vector<Car> res; string line;
     while (getline(in, line)) {
         if (line.empty()) continue;
-        Car c;
-        if (Car::from_line(line, c)) v.push_back(c);
+        Car c; if (Car::from_line(line, c)) res.push_back(c);
     }
-    return v;
+    return res;
 }
-
-inline void write_all_cars(const vector<Car>& v) {
+inline void write_all_cars(const vector<Car>& cars) {
     ofstream out(CARS_FILE, ios::trunc);
-    for (auto &c : v) out << c.to_line() << '\n';
+    for (auto &c : cars) out << c.to_line() << '\n';
 }
-
-inline void append_car(const Car &c) {
+inline void append_car(const Car& c) {
     ofstream out(CARS_FILE, ios::app);
     out << c.to_line() << '\n';
 }
-
 inline vector<Booking> read_all_bookings() {
     ensure_file(BOOKINGS_FILE);
     ifstream in(BOOKINGS_FILE);
-    vector<Booking> v; string line;
+    vector<Booking> res; string line;
     while (getline(in, line)) {
         if (line.empty()) continue;
-        Booking b;
-        if (Booking::from_line(line, b)) v.push_back(b);
+        Booking b; if (Booking::from_line(line, b)) res.push_back(b);
     }
-    return v;
+    return res;
 }
-
 inline void write_all_bookings(const vector<Booking>& v) {
     ofstream out(BOOKINGS_FILE, ios::trunc);
     for (auto &b : v) out << b.to_line() << '\n';
 }
-
 inline void append_booking(const Booking& b) {
     ofstream out(BOOKINGS_FILE, ios::app);
     out << b.to_line() << '\n';
 }
-
 inline vector<Booking> read_all_deliveries() {
     ensure_file(DELIVERIES_FILE);
     ifstream in(DELIVERIES_FILE);
-    vector<Booking> v; string line;
+    vector<Booking> res; string line;
     while (getline(in, line)) {
         if (line.empty()) continue;
-        Booking b;
-        if (Booking::from_line(line, b)) v.push_back(b);
+        Booking b; if (Booking::from_line(line, b)) res.push_back(b);
     }
-    return v;
+    return res;
 }
-
 inline void write_all_deliveries(const vector<Booking>& v) {
     ofstream out(DELIVERIES_FILE, ios::trunc);
     for (auto &b : v) out << b.to_line() << '\n';
 }
-
 inline void append_delivery(const Booking& b) {
     ofstream out(DELIVERIES_FILE, ios::app);
     out << b.to_line() << '\n';
 }
-
 inline void log_action(const string &s) {
     ofstream out(TRANSACTIONS_LOG, ios::app);
     time_t t = time(nullptr);
@@ -296,14 +303,12 @@ inline int next_car_id() {
     for (auto &c : cars) mx = max(mx, c.id);
     return mx + 1;
 }
-
 inline int next_booking_id() {
     auto bookings = read_all_bookings();
     int mx = 1000;
     for (auto &b : bookings) mx = max(mx, b.bookingId);
     return mx + 1;
 }
-
 inline bool admin_update_car_status(int id, const string &status) {
     auto cars = read_all_cars();
     for (auto &c : cars)
