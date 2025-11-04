@@ -54,3 +54,45 @@
 ] Delivered booking ID 1004
 [Sun Nov 02 20:40:31 2025
 ] Admin updated car ID 125 status: Available -> Booked
+[Mon Nov 03 20:47:25 2025
+] Admin updated car ID 103 status: Available -> Sold
+[Mon Nov 03 20:47:25 2025
+] Delivered booking ID 1001
+[Mon Nov 03 20:47:30 2025
+] Admin updated car ID 106 status: Available -> Sold
+[Mon Nov 03 20:47:30 2025
+] Delivered booking ID 1002
+[Mon Nov 03 20:47:31 2025
+] Admin updated car ID 104 status: Booked -> Sold
+[Mon Nov 03 20:47:31 2025
+] Delivered booking ID 1003
+[Mon Nov 03 20:47:32 2025
+] Admin updated car ID 105 status: Available -> Sold
+[Mon Nov 03 20:47:32 2025
+] Delivered booking ID 1004
+[Mon Nov 03 20:47:33 2025
+] Admin updated car ID 104 status: Sold -> Sold
+[Mon Nov 03 20:47:33 2025
+] Delivered booking ID 1005
+[Mon Nov 03 20:47:33 2025
+] Admin updated car ID 104 status: Sold -> Sold
+[Mon Nov 03 20:47:33 2025
+] Delivered booking ID 1006
+[Mon Nov 03 20:48:29 2025
+] Booking created 1007
+[Mon Nov 03 20:50:14 2025
+] Admin updated car ID 119 status: Booked -> Sold
+[Mon Nov 03 20:50:14 2025
+] Delivered booking ID 1007
+[Mon Nov 03 21:12:08 2025
+] Car added 126
+[Tue Nov 04 10:30:32 2025
+] Admin updated car ID 102 status: Available -> Booked
+[Tue Nov 04 10:33:38 2025
+] Booking created 1008
+[Tue Nov 04 10:33:55 2025
+] Booking created 1009
+[Tue Nov 04 10:34:41 2025
+] Admin updated car ID 115 status: Booked -> Sold
+[Tue Nov 04 10:34:41 2025
+] Delivered booking ID 1008

@@ -214,7 +214,7 @@ public:
         b.status = "Delivered";
         append_delivery(b);
 
-        // ✅ Update bookings.txt
+        //  Update bookings.txt
         vector<Booking> allBookings = read_all_bookings();
         for (auto &bk : allBookings)
             if (bk.bookingId == b.bookingId) {
@@ -223,11 +223,11 @@ public:
             }
         write_all_bookings(allBookings);
 
-        // ✅ Update car status to Sold
+        //  Update car status to Sold
         admin_update_car_status(b.carId, "Sold");
 
         log_action("Delivered booking ID " + to_string(b.bookingId));
-        cout << "✅ Delivered booking: " << b.bookingId << " (Car ID " << b.carId << ")\n";
+        cout << " Delivered booking: " << b.bookingId << " (Car ID " << b.carId << ")\n";
     }
 
     bool empty() const { return q.empty(); }

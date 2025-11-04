@@ -1,9 +1,9 @@
 101|Kia|Sonet|2010|500000.00|Kia Motors India|Available
-102|Hyundai|Creta|2015|700000.00|Hyundai Showroom|Available
-103|Suzuki|Brezza|2020|1000000.00|Maruti Arena|Available
-104|Toyota|Glanza|2022|1200000.00|Toyota Trust|Booked
-105|Suzuki|Baleno|2021|900000.00|Nexa Motors|Available
-106|Honda|City|2018|800000.00|Honda City Dealer|Available
+102|Hyundai|Creta|2015|700000.00|Hyundai Showroom|Booked
+103|Suzuki|Brezza|2020|1000000.00|Maruti Arena|Sold
+104|Toyota|Glanza|2022|1200000.00|Toyota Trust|Sold
+105|Suzuki|Baleno|2021|900000.00|Nexa Motors|Sold
+106|Honda|City|2018|800000.00|Honda City Dealer|Sold
 107|Tata|Tiago|2017|425000.00|Tata Motors|Available
 108|Tata|Altroz|2021|750000.00|AutoIndia|Available
 109|Tata|Punch|2022|650000.00|CarZone|Available
@@ -12,14 +12,15 @@
 112|Hyundai|Venue|2021|950000.00|DriveIndia|Available
 113|Suzuki|Baleno|2020|800000.00|MSArena|Available
 114|Suzuki|Ertiga|2022|1050000.00|MarutiDealer|Available
-115|Honda|Amaze|2021|900000.00|HondaCity|Available
-116|Honda|Jazz|2020|850000.00|AutoHub|Available
+115|Honda|Amaze|2021|900000.00|HondaCity|Sold
+116|Honda|Jazz|2020|850000.00|AutoHub|Booked
 117|Toyota|Innova|2021|2000000.00|ToyotaTrust|Available
 118|Toyota|Fortuner|2023|3800000.00|ToyotaTrust|Available
-119|Kia|Seltos|2022|1500000.00|KiaMotors|Available
+119|Kia|Seltos|2022|1500000.00|KiaMotors|Sold
 120|Kia|Carens|2023|1800000.00|KiaMotors|Available
 121|MG|Astor|2022|1400000.00|MGMotors|Available
 122|MG|Hector|2023|1700000.00|MGMotors|Available
 123|Tata|Harrier|2022|1800000.00|AutoIndia|Available
 124|Tata|Nexon|2023|1200000.00|TataMotors|Available
 125|Toyota|Fortuner|2024|4200000.00|Toyota Showroom|Booked
+126|Kia|Seltos|2021|1000000.00|Kia Motors India|Available
